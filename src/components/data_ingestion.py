@@ -24,7 +24,7 @@ class DataIngestion:
         logging.info('Data Ingestion started...')
 
         try:
-            df = pd.read_excel('D:\Data Science\iNeuron\ML\Logistic\data\default of credit card clients.xls', header=1)
+            df = pd.read_excel(r"D:\Data Science\iNeuron\ML\Logistic\Credit Card Fraud Classification\data\default of credit card clients.xls", header=1)
             os.makedirs(os.path.dirname(self.data_ingestion_config.raw_data_path), exist_ok=True)
             df.to_csv(self.data_ingestion_config.raw_data_path, index=False, header=True)
 

@@ -7,6 +7,8 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 from src.logger import logging
 from src.exception import CustomException
 
+from sklearn.model_selection import GridSearchCV
+
 
 def save_object(filepath, obj):
     try:
@@ -27,7 +29,7 @@ def save_object(filepath, obj):
 def evaluate_models(X_train, y_train, X_test, y_test, models):
 
     try:
-        report = {'Model_Name': [], "Model": [], "Acc_Score": [], "ConfusionMatrix": []}\
+        report = {'Model_Name': [], "Model": [], "Acc_Score": [], "ConfusionMatrix": []}
         
         for i in range(len(models)):
             model = list(models.values())[i]
@@ -60,6 +62,46 @@ def evaluate_models(X_train, y_train, X_test, y_test, models):
         raise CustomException(e, sys)
 
 
+def enhance_model(X_train, y_train, X_test, y_test, models, params):
+    try:
+        report = {'Model_Name': [], "Model": [], "Acc_Score": [], "ConfusionMatrix": []}
+        
+        model = list(models.values())[0]
+        model_name = list(models.keys())[0]
+
+        logging.info(f'Enhancing {model_name}')
+
+        grid_search=GridSearchCV(estimator=model,param_grid=params,cv=5, verbose=10)
+        grid_search.fit(X_train,y_train)
+
+        logging.info(f'Best Estimator: {grid_search.best_estimator_}')
+        logging.info(f'Best Param: {grid_search.best_params_}')
+
+        model.set_params(**grid_search.best_params_)
+
+        # Train model
+        model.fit(X_train, y_train)
+
+        # Predict Testing data
+        y_pred = model.predict(X_test)
+
+        # r2 score
+        test_score = accuracy_score(y_test, y_pred)
+
+        cm = confusion_matrix(y_test, y_pred)
+
+        logging.info(f'Training Complete... Accuracy_Score: {test_score}')
+
+        report['Model_Name'].append(model_name)
+        report['Model'].append(model)
+        report['Acc_Score'].append(test_score*100)
+        report["ConfusionMatrix"].append(cm)
+
+        return report
+    
+    except Exception as e:
+        logging.error('Error in Training')
+        raise CustomException(e, sys)
 
 def load_object(filepath):
     try:
