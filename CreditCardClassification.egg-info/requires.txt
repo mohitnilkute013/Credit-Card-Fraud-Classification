@@ -1,0 +1,8 @@
+pandas
+numpy
+scikit-learn
+matplotlib
+flask
+seaborn
+xgboost
+ensemble-tabpfn
